@@ -1,0 +1,57 @@
+schema_version: 1
+
+context:
+  version: "2.0.29"
+  python_min: "3.10"
+
+package:
+  name: cloudsmith-api
+  version: ${{ version }}
+
+source:
+  - url: https://pypi.org/packages/source/c/cloudsmith-api/cloudsmith_api-${{ version }}.tar.gz
+    sha256: 57771b2c7cfe681d685273dfcfd214dd36c2775d9fc080122b40b4d6c404c452
+  # The sdist does not include the license. Upstream has no release tags, so use
+  # a commit-pinned copy rather than the mutable default branch.
+  - url: https://raw.githubusercontent.com/cloudsmith-io/cloudsmith-api/4e9e27a34ac16d0048426ed1c0252d6b537bd924/LICENSE
+    sha256: 784cf5c0459b05916573f9ff3ffe798b80826205a01d8549a508e773aa9b5ce4
+    target_directory: license_files
+
+build:
+  number: 0
+  noarch: python
+  script:
+    # Upstream's find_packages() includes a top-level `test` package that
+    # shadows Python's standard-library package. Exclude it from the artifact.
+    - rm -rf test
+    - ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+requirements:
+  host:
+    - python ${{ python_min }}.*
+    - pip
+    - setuptools
+  run:
+    - python >=${{ python_min }}
+    - certifi >=2017.4.17
+    - python-dateutil >=2.1
+    - six >=1.10
+    - urllib3 >=1.23
+
+tests:
+  - python:
+      imports:
+        - cloudsmith_api
+      pip_check: true
+      python_version: ${{ python_min }}.*
+
+about:
+  homepage: https://github.com/cloudsmith-io/cloudsmith-api
+  summary: Cloudsmith API (v1) Python client bindings
+  license: Apache-2.0
+  license_file: license_files/LICENSE
+  repository: https://github.com/cloudsmith-io/cloudsmith-api
+
+extra:
+  recipe-maintainers:
+    - BartoszBlizniak
